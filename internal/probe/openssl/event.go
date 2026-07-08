@@ -196,7 +196,13 @@ func (e *Event) StringHex() string {
 
 	ts := time.Unix(int64(e.Timestamp), 0)
 
-	hexData := hexdump.DumpByteSlice(e.GetData(), "")
+	data := e.GetData()
+	var dataSection string
+	if httpFormatted, isHTTP := hexdump.FormatHTTPHex(data); isHTTP {
+		dataSection = httpFormatted
+	} else {
+		dataSection = hexdump.DumpByteSlice(data, "")
+	}
 
 	return fmt.Sprintf("[%s] PID:%d TID:%d Comm:%s FD:%d %s (%d bytes, hex):\n%s",
 		ts.Format("2006-01-02 15:04:05.000"),
@@ -206,7 +212,7 @@ func (e *Event) StringHex() string {
 		e.Fd,
 		direction,
 		e.DataLen,
-		hexData,
+		dataSection,
 	)
 }
 

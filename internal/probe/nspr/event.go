@@ -190,8 +190,16 @@ func (e *TLSDataEvent) StringHex() string {
 		direction = "write"
 	}
 
+	data := e.GetData()
+	var dataSection string
+	if httpFormatted, isHTTP := hexdump.FormatHTTPHex(data); isHTTP {
+		dataSection = httpFormatted
+	} else {
+		dataSection = hexdump.DumpByteSlice(data, "")
+	}
+
 	return fmt.Sprintf("TLSDataEvent{Timestamp: %v, PID: %d, TID: %d, Comm: %s, Direction: %s, DataLen: %d, Data(hex):\n%s}",
-		e.GetTimestamp(), e.PID, e.TID, e.GetComm(), direction, e.DataLen, hexdump.DumpByteSlice(e.GetData(), ""))
+		e.GetTimestamp(), e.PID, e.TID, e.GetComm(), direction, e.DataLen, dataSection)
 }
 
 // Clone implements domain.Event interface
