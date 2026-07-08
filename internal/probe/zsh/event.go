@@ -25,6 +25,7 @@ import (
 
 	"github.com/gojue/ecapture/internal/domain"
 	"github.com/gojue/ecapture/internal/errors"
+	"github.com/gojue/ecapture/pkg/util/hexdump"
 )
 
 const (
@@ -88,7 +89,7 @@ func (e *Event) String() string {
 // StringHex returns a hexadecimal representation of the event.
 func (e *Event) StringHex() string {
 	line := strings.TrimSuffix(unix.ByteSliceToString(e.Line[:]), "\n")
-	hexData := fmt.Sprintf("%x", []byte(line))
+	hexData := hexdump.DumpByteSlice([]byte(line), "")
 	return fmt.Sprintf("PID:%d, UID:%d, \tComm:%s, \tLine(hex):\n%s",
 		e.Pid, e.Uid, commToString(e.Comm[:]), hexData)
 }

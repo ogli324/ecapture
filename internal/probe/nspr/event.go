@@ -22,6 +22,7 @@ import (
 
 	"github.com/gojue/ecapture/internal/domain"
 	"github.com/gojue/ecapture/internal/errors"
+	"github.com/gojue/ecapture/pkg/util/hexdump"
 )
 
 const (
@@ -189,8 +190,8 @@ func (e *TLSDataEvent) StringHex() string {
 		direction = "write"
 	}
 
-	return fmt.Sprintf("TLSDataEvent{Timestamp: %v, PID: %d, TID: %d, Comm: %s, Direction: %s, DataLen: %d, Data(hex): %x}",
-		e.GetTimestamp(), e.PID, e.TID, e.GetComm(), direction, e.DataLen, e.GetData())
+	return fmt.Sprintf("TLSDataEvent{Timestamp: %v, PID: %d, TID: %d, Comm: %s, Direction: %s, DataLen: %d, Data(hex):\n%s}",
+		e.GetTimestamp(), e.PID, e.TID, e.GetComm(), direction, e.DataLen, hexdump.DumpByteSlice(e.GetData(), ""))
 }
 
 // Clone implements domain.Event interface

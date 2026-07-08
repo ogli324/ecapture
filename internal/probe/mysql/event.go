@@ -22,6 +22,7 @@ import (
 	"golang.org/x/sys/unix"
 
 	"github.com/gojue/ecapture/internal/domain"
+	"github.com/gojue/ecapture/pkg/util/hexdump"
 )
 
 const (
@@ -121,9 +122,16 @@ func (e *Event) String() string {
 	)
 }
 
-// StringHex returns a hex representation of the event (same as String for MySQL)
+// StringHex returns a hex representation of the event
 func (e *Event) StringHex() string {
-	return e.String()
+	return fmt.Sprintf("MySQL Query[PID=%d, Comm=%s, Len=%d/%d, Status=%s, Query(hex)]:\n%s",
+		e.Pid,
+		unix.ByteSliceToString(e.Comm[:]),
+		e.Len,
+		e.Alllen,
+		e.Retval.String(),
+		hexdump.DumpByteSlice(e.Query[:e.Len], ""),
+	)
 }
 
 // Clone creates a new instance of the event

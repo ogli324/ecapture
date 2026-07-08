@@ -19,6 +19,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/gojue/ecapture/pkg/util/hexdump"
 	pb "github.com/gojue/ecapture/protobuf/gen/v1"
 )
 
@@ -28,11 +29,6 @@ const (
 	ProbeEntry AttachType = iota
 	ProbeRet
 )
-
-// 格式化输出相关
-
-const ChunkSize = 16
-const ChunkSizeHalf = ChunkSize / 2
 
 const MaxDataSize = 1024 * 16
 
@@ -143,10 +139,10 @@ func (be *BaseEvent) StringHex() string {
 		prefix = fmt.Sprintf("UNKNOWN_%d", be.DataType)
 	}
 
-	b := dumpByteSlice(be.Data[:be.DataLen], prefix)
+	b := hexdump.DumpByteSlice(be.Data[:be.DataLen], prefix)
 
 	v := TlsVersion{Version: be.Version}
-	s := fmt.Sprintf("PID:%d, Comm:%s, TID:%d, %s, Version:%s, Payload:\n%s", be.Pid, CToGoString(be.Comm[:]), be.Tid, connInfo, v.String(), b.String())
+	s := fmt.Sprintf("PID:%d, Comm:%s, TID:%d, %s, Version:%s, Payload:\n%s", be.Pid, CToGoString(be.Comm[:]), be.Tid, connInfo, v.String(), b)
 	return s
 }
 
@@ -205,47 +201,4 @@ func CToGoString(c []byte) string {
 		n = i
 	}
 	return string(c[:n+1])
-}
-
-func dumpByteSlice(b []byte, prefix string) *bytes.Buffer {
-	var a [ChunkSize]byte
-	bb := new(bytes.Buffer)
-	n := (len(b) + (ChunkSize - 1)) &^ (ChunkSize - 1)
-
-	for i := 0; i < n; i++ {
-
-		// 序号列
-		if i%ChunkSize == 0 {
-			bb.WriteString(prefix)
-			_, _ = fmt.Fprintf(bb, "%04d", i)
-		}
-
-		// 长度的一半，则输出4个空格
-		if i%ChunkSizeHalf == 0 {
-			bb.WriteString("    ")
-		} else if i%(ChunkSizeHalf/2) == 0 {
-			bb.WriteString("  ")
-		}
-
-		if i < len(b) {
-			_, _ = fmt.Fprintf(bb, " %02X", b[i])
-		} else {
-			bb.WriteString("  ")
-		}
-
-		// 非ASCII 改为 .
-		if i >= len(b) {
-			a[i%ChunkSize] = ' '
-		} else if b[i] < 32 || b[i] > 126 {
-			a[i%ChunkSize] = '.'
-		} else {
-			a[i%ChunkSize] = b[i]
-		}
-
-		// 如果到达size长度，则换行
-		if i%ChunkSize == (ChunkSize - 1) {
-			_, _ = fmt.Fprintf(bb, "    %s\n", string(a[:]))
-		}
-	}
-	return bb
 }

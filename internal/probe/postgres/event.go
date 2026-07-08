@@ -23,6 +23,7 @@ import (
 
 	"github.com/gojue/ecapture/internal/domain"
 	"github.com/gojue/ecapture/internal/errors"
+	"github.com/gojue/ecapture/pkg/util/hexdump"
 )
 
 const (
@@ -116,8 +117,8 @@ func (e *Event) String() string {
 
 // StringHex returns a hexadecimal string representation of the event
 func (e *Event) StringHex() string {
-	return fmt.Sprintf("PID=0x%x Timestamp=0x%x Query=%x Comm=%x",
-		e.Pid, e.Timestamp, e.Query[:32], e.Comm)
+	return fmt.Sprintf("PID=0x%x Timestamp=0x%x Comm=%x Query(hex):\n%s",
+		e.Pid, e.Timestamp, e.Comm, hexdump.DumpByteSlice(e.Query[:], ""))
 }
 
 // Clone creates a deep copy of the event

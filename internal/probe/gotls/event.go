@@ -23,6 +23,7 @@ import (
 
 	"github.com/gojue/ecapture/internal/domain"
 	"github.com/gojue/ecapture/internal/errors"
+	"github.com/gojue/ecapture/pkg/util/hexdump"
 )
 
 const (
@@ -323,13 +324,14 @@ func (e *GoTLSDataEvent) StringHex() string {
 	if e.IsRead() {
 		direction = "READ"
 	}
+	hexData := hexdump.DumpByteSlice(e.GetData(), "")
 	tuple := e.GetTuple()
 	if tuple == "" {
-		return fmt.Sprintf("PID:%d, TID:%d, Comm:%s, FD:%d, Type:%s, Len:%d\nData(hex):\n%x",
-			e.Pid, e.Tid, commToString(e.Comm[:]), e.Fd, direction, e.DataLen, e.GetData())
+		return fmt.Sprintf("PID:%d, TID:%d, Comm:%s, FD:%d, Type:%s, Len:%d\nData(hex):\n%s",
+			e.Pid, e.Tid, commToString(e.Comm[:]), e.Fd, direction, e.DataLen, hexData)
 	}
-	return fmt.Sprintf("PID:%d, TID:%d, Comm:%s, FD:%d, Tuple:%s, Type:%s, Len:%d\nData(hex):\n%x",
-		e.Pid, e.Tid, commToString(e.Comm[:]), e.Fd, tuple, direction, e.DataLen, e.GetData())
+	return fmt.Sprintf("PID:%d, TID:%d, Comm:%s, FD:%d, Tuple:%s, Type:%s, Len:%d\nData(hex):\n%s",
+		e.Pid, e.Tid, commToString(e.Comm[:]), e.Fd, tuple, direction, e.DataLen, hexData)
 }
 
 // Clone creates a new empty instance of the event.
